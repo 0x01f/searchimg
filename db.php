@@ -3,8 +3,8 @@
 class functionalDB {
     /**
      * Mysql check and insert table
+     * 
      */
-    
     public function createArray() {
         $conn = new mysqli("localhost", "root", "", "image_hash");
         if($conn->connect_error) {
