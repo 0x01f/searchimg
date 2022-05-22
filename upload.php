@@ -128,29 +128,35 @@ if (isset($_FILES[$input_name])) {
 				}
 			}
 		}
-		// Выводим сообщение о результате загрузки.
-		if (!empty($success)) {
-			echo '<p>' . $success . '</p>';
-		} else {
-			echo '<p>' . $error . '</p>';
-		}
+		
 
-		/**
+        /**
 		 * функция до преобразования
 		 */
-	
 		$img = $hash->createHashFromFile('img_grey/' . $name);
-		imagedestroy($imggrey);
-		foreach ($arrayDB as $item) {
-			$isEqual = $hash->compareImageHashes($item[1], $img, 0.3);
-			if ($isEqual) {
-				echo 'Является дубликатом изображения с точностью до 70%: Имя файла ' . $item[0] . '<br>';
-			}
-		}
 		if(empty($arrayDB)) {
 			$createItem = $db->createItem($name, $img);
 		} else {
 			$createItem = $db->createItem($name, $img);
+		}
+
+		foreach ($arrayDB as $item) {
+			$isEqual = $hash->compareImageHashes($item[1], $img, 0.15);
+			$ratio = $hash->compareImageHashes($item[1], $img, 0.3);
+			if($isEqual && $ratio) {
+				$success = 'Файл «' . $name . '» являлся дубликатом ' . $item[0] . ' и не был загружен.';
+				echo 'Файл: ' . $name . 'существует и будет удален';
+				$db->deleteItem($name)  . '</br>';
+				unlink( __DIR__ . '/images/' . $name);
+				unlink( __DIR__ . '/img_grey/' . $name);
+			}
+		}
+
+		// Выводим сообщение о результате загрузки.
+		if (!empty($success)) {
+			echo '<p>' . $success . '</p>';
+			} else {
+			echo '<p>' . $error . '</p>';
 		}
 	}
 }
