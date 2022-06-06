@@ -34,6 +34,19 @@
         </form>
       </div>
     </div>
+    <!-- <hr class="my-4">
+    <div class="row">
+      <div class="col text-center">
+        <h4 class="mb-3">Дубликаты изображений</h4>
+        <div class="duplicate">
+          <img src="" alt="" width="400" height="300">
+          <img src="" alt="" width="400" height="300">
+          <h4>Является ли изображение дубликатом ?</h4>
+          <input class="w-25 btn btn-primary btn-lg" type="submit" value="Да">
+          <input class="w-25 btn btn-primary btn-lg" type="submit" value="Нет">
+        </div>
+      </div>
+    </div> -->
   </main>
 
   <footer class="my-5 pt-5 text-muted text-center text-small">
@@ -45,5 +58,3 @@
 </body>
 </body>
 </html>
-
-

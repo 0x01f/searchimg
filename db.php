@@ -8,7 +8,7 @@ class functionalDB {
      */
     
     public function createArray() {
-        $conn = new mysqli("185.198.164.6", "deron47096_img", "pQ2dH3kU6fyM4u", "deron47096_img");
+        $conn = new mysqli("localhost", "root", "", "image_hash");
         if($conn->connect_error) {
             die("Ошибка: " . $conn->connect_error);
         }
@@ -31,7 +31,7 @@ class functionalDB {
     // }
 
     public function createItem($image_name, $image_hash) {
-        $conn = new mysqli("185.198.164.6", "deron47096_img", "pQ2dH3kU6fyM4u", "deron47096_img");
+        $conn = new mysqli("localhost", "root", "", "image_hash");
         if($conn->connect_error) {
             die("Ошибка: " . $conn->connect_error);
         }
@@ -45,7 +45,7 @@ class functionalDB {
     }
     
     public function deleteItem($image_name) {
-        $conn = new mysqli("185.198.164.6", "deron47096_img", "pQ2dH3kU6fyM4u", "deron47096_img");
+        $conn = new mysqli("localhost", "root", "", "image_hash");
         if($conn->connect_error) {
             die("Ошибка: " . $conn->connect_error);
         }
