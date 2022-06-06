@@ -1,3 +1,5 @@
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<link type="text/css" rel="stylesheet" href="style.css">
 <?php
 
 require_once "ImageHash.php";
@@ -40,8 +42,9 @@ if (isset($_FILES[$input_name])) {
 			}
 		}		
 	}	
-
+	
 	$arrayDB = $db->createArray();
+	echo '<h3>Результат загрузки: </h3>';
 	foreach ($files as $file) {
 		$error = $success = '';
 
@@ -129,34 +132,89 @@ if (isset($_FILES[$input_name])) {
 			}
 		}
 		
+		/**
+        * функция до преобразования
+        */
+        $img = $hash->createHashFromFile('img_grey/' . $name);
+        if(empty($arrayDB)) {
+            $createItem = $db->createItem($name, $img);
+        } else {
+            $createItem = $db->createItem($name, $img);
+        }
 
-        /**
-		 * функция до преобразования
-		 */
-		$img = $hash->createHashFromFile('img_grey/' . $name);
-		if(empty($arrayDB)) {
-			$createItem = $db->createItem($name, $img);
-		} else {
-			$createItem = $db->createItem($name, $img);
-		}
-
-		foreach ($arrayDB as $item) {
-			$isEqual = $hash->compareImageHashes($item[1], $img, 0.15);
-			$ratio = $hash->compareImageHashes($item[1], $img, 0.3);
-			if($isEqual && $ratio) {
-				$success = 'Файл «' . $name . '» являлся дубликатом ' . $item[0] . ' и не был загружен.';
-				echo 'Файл: ' . $name . 'существует и будет удален';
-				$db->deleteItem($name)  . '</br>';
-				unlink( __DIR__ . '/images/' . $name);
-				unlink( __DIR__ . '/img_grey/' . $name);
+		$mainImg = null;
+		$mainHash = null;
+		$resultduplicate = '';
+		$flag = true;
+        foreach ($arrayDB as $item) {
+            $isEqual = $hash->compareImageHashes($item[1], $img, 0.15);
+            $ratio = $hash->compareImageHashes($item[1], $img, 0.3);
+			if ($isEqual && $ratio && !$flag) {
+				$resultduplicate .= '<div class="duplicate" name="' . $item[0] . '">';
+				$resultduplicate .= 'Изображение в базе ' . $item[0] . ', является дубликатом: ' . $mainImg . '</br>';
+				$resultduplicate .= '<img id="duplicate" alt="Дубликат" name="' . $item[0]  . '" src="' . 'images/' . $item[0] . '" width="300" height="200">';
+				$resultduplicate .= '<img id="original" alt="Дубликат" name="' . $mainImg  . '" src="' . 'images/' . $mainImg . '" width="300" height="200">' . '</br>';
+				$resultduplicate .= '<div class="buttons"><input id="yes" name="' . $item[0] . '" type="button" onclick="postDupInBase(this.name)" value="Да"/>';
+				$resultduplicate .= '<input id="no" name="' .  $item[0] . '" type="button" onclick="noDupInBase(this.name)" value="Нет"/></div>';
+				$resultduplicate .= '</div>';
+			}
+			if ($isEqual && $ratio && $flag) {
+				$mainImg .= $item[0];
+				$mainHash .= $item[1];
+				$resultduplicate .= '<div class="duplicate" name="' . $name . '">';
+				$resultduplicate .= 'Загруженное изображение, является дубликатом: ' . $mainImg . '</br>';
+				$resultduplicate .= '<img id="duplicate" alt="Дубликат" name="' . $name  . '" src="' . 'images/' . $name . '" width="300" height="200">';
+				$resultduplicate .= '<img id="original" alt="Оригинал" name="' . $mainImg  . '" src="' . 'images/' . $mainImg . '" width="300" height="200">' . '</br>';
+				$resultduplicate .= '<div class="buttons"><input id="yes" name="' . $name . '" type="button" onclick="postDup(this.name)" value="Да"/>';
+				$resultduplicate .= '<input id="no" name="' .  $name . '" type="button" onclick="noDup(this.name)" value="Нет"/></div>';
+				$resultduplicate .= '</div>';
+				$flag = false;
 			}
 		}
 
-		// Выводим сообщение о результате загрузки.
-		if (!empty($success)) {
-			echo '<p>' . $success . '</p>';
-			} else {
-			echo '<p>' . $error . '</p>';
-		}
+        // Выводим сообщение о результате загрузки.
+        if (!empty($success)) {
+            echo '<p>' . $success . '</p>';
+			echo $resultduplicate;
+            } else {
+            echo '<p>' . $error . '</p>';
+        }
 	}
+	echo '<div id="result">
+			<h3>Результат проверки: </h3>
+		</div>';
 }
+?>
+<script>		
+function postDup(name){
+var name = name;
+	$.ajax({
+	type: "POST",
+	url: "checkDuplicate.php",
+	data: {duplicatename:name}
+		}).done(function( result )
+			{	
+				document.querySelector('div[name="' + name + '"]').remove();
+				document.getElementById('result').innerHTML += result;
+			});
+}
+function noDup(name) {
+	document.querySelector('div[name="' + name + '"]').remove();
+	document.getElementById('result').innerHTML += 'Файл ' + name + ' успешно загружен' + '</br>';
+}
+
+function postDupInBase(name){
+var name = name;
+	$.ajax({
+	type: "POST",
+	url: "checkDuplicate.php",
+	data: {duplicatename:name}
+		}).done(function( result )
+			{	
+				document.querySelector('div[name="' + name + '"]').remove();
+			});
+}
+function noDupInBase(name) {
+	document.querySelector('div[name="' + name + '"]').remove();
+}	
+</script>
